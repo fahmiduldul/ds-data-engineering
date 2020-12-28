@@ -1,29 +1,97 @@
+'''
+to run this file:
+python3 web-app/app/backend/train_classifier.py web-app/app/database/DisasterResponse.db web-app/app/model/test_model.pickle test
+the "test" argument used to run the model with only 1000 messages
+'''
+
 import sys
+
+import pandas as pd
+import numpy as np
+from sqlalchemy import create_engine
+import sqlite3 as sq
+import re
+import pickle
+
+import nltk
+nltk.download(['punkt', 'stopwords', 'wordnet', 'averaged_perceptron_tagger'])
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.stem.porter import PorterStemmer
+
+from sklearn.pipeline import Pipeline, FeatureUnion
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
+from sklearn.model_selection import GridSearchCV
+from sklearn.linear_model import LogisticRegression
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.metrics import f1_score
 
 def load_data(database_filepath):
-    pass
+    df = pd.read_sql("SELECT * FROM messages_and_categories", sq.connect(database_filepath))
+
+    if sys.argv[-1] == "test":
+        df = df.iloc[:100]
+
+    X = df["message"]
+    Y = df.drop(["message", "original", "genre"], axis=1)
+    category_names = Y.columns
+
+    return (X, Y, category_names)
 
 
 def tokenize(text):
-    pass
+    '''
+    PARAMETERS:
+    text - raw string
+
+    RETURN:
+    tokens - list of token word
+    '''
+    # make all lowercase and delete punctuation
+    text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
+
+    #tokenize and lemmatize
+    tokens = word_tokenize(text.lower())
+    tokens = [WordNetLemmatizer().lemmatize(token) for token in tokens]
+    return tokens
 
 
 def build_model():
-    pass
+    pipeline = Pipeline([
+        ('vect', CountVectorizer(tokenizer=tokenize)),
+        ('tfidf', TfidfTransformer()),
+        ('clf', MultiOutputClassifier(RandomForestClassifier()))
+    ])
+
+    parameters = {
+        'clf__estimator__n_estimators': [50,100],
+        'clf__estimator__min_samples_split': [2, 4],
+        'tfidf__use_idf': [True, False]
+    }
+
+    return GridSearchCV(pipeline, param_grid=parameters)
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+    Y_preds = pd.DataFrame(model.predict(X_test), columns=category_names)
+
+    for category in category_names:
+        print(classification_report(Y_test[category], Y_preds[category]))
 
 
 def save_model(model, model_filepath):
-    pass
+    with open(model_filepath, 'wb') as dir:
+        pickle.dump(model, dir)
 
 
 def main():
-    if len(sys.argv) == 3:
-        database_filepath, model_filepath = sys.argv[1:]
+    if len(sys.argv) == 4:
+        database_filepath, model_filepath = sys.argv[1:3]
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)

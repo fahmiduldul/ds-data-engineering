@@ -3,6 +3,10 @@ import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine
 
+'''
+run this file: 'python3 web-app/app/backend/process_data.py datasets/messages.csv datasets/categories.csv datasets/DisasterResponse.db'
+'''
+
 def load_data(messages_filepath, categories_filepath):
     """
     PARAMETERS:

@@ -86,7 +86,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 def save_model(model, model_filepath):
     with open(model_filepath, 'wb') as dir:
-        pickle.dump(model, dir)
+        pickle.dump(model.best_estimator_, dir)
 
 
 def main():

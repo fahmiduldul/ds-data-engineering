@@ -1,5 +1,5 @@
 '''
-to run this file:
+to run this file from app/ directory:
 python3 train_classifier.py database/DisasterResponse.db models/test_model.pickle test
 the "test" argument used to run the model with only 100 messages
 '''
@@ -55,7 +55,6 @@ def build_model():
     parameters = {
         'clf__estimator__n_estimators': [50,100],
         'clf__estimator__min_samples_split': [2, 4],
-        'tfidf__use_idf': [True, False]
     }
 
     return GridSearchCV(pipeline, param_grid=parameters)

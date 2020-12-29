@@ -20,7 +20,7 @@ engine = create_engine('sqlite:///database/DisasterResponse.db')
 df = pd.read_sql_table('messages_and_categories', engine)
 
 # load model
-file_dir = r"models/test_model.pickle"
+file_dir = r"models/model.pickle"
 model = pickle.load(open(file_dir, "rb"))
 
 

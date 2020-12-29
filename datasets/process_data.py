@@ -4,7 +4,7 @@ import numpy as np
 from sqlalchemy import create_engine
 
 '''
-run this file:
+run this file from root folder:
 python3 datasets/process_data.py datasets/messages.csv datasets/categories.csv datasets/DisasterResponse.db
 '''
 

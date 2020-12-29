@@ -52,6 +52,16 @@ def clean_data(df):
     # remove duplicates
     df = df[~df.duplicated()]
 
+    #check for non-binary result
+    nonbinary_cols = []
+    for category in df.drop(columns=['message', 'original', 'genre']).columns:
+        if len(list(df[category].unique())) > 2:
+            nonbinary_cols.append(category)
+
+    # convert non 0 and 1 to 1
+    for category in nonbinary_cols:
+        df[category][~df[category].isin([0,1])] = 1
+
     return df
 
 def save_data(df, database_filename):

@@ -10,7 +10,7 @@ python3 datasets/process_data.py datasets/messages.csv datasets/categories.csv d
 
 def load_data(messages_filepath, categories_filepath):
     """
-    PARAMETERS:
+    PARAMETER:
     messages_filepath - filepath for messages
     categories_filepath - filepath for categories
 
@@ -26,7 +26,13 @@ def load_data(messages_filepath, categories_filepath):
     return df
 
 def clean_data(df):
+    '''
+    PARAMETER:
+    df (DataFrame) - dataframe to be cleaned
 
+    RETURN:
+    df (DataFrame) - cleaned dataframe
+    '''
     #split categories from one column to 36 columns
     categories = df['categories'].str.split(';', expand=True)
 
@@ -49,6 +55,14 @@ def clean_data(df):
     return df
 
 def save_data(df, database_filename):
+    '''
+    PARAMETER:
+    df (DataFrame) - dataframe to be saved
+    database_filename (string) - database file name
+
+    RETURN:
+    None
+    '''
     engine = create_engine('sqlite:///' + database_filename)
     df.to_sql('messages_and_categories', engine, index=False)
 

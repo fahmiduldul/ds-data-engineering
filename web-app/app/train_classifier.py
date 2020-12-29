@@ -33,6 +33,15 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.metrics import f1_score
 
 def load_data(database_filepath):
+    '''
+    PARAMETER:
+    database_filepath (string) - database directory
+
+    RETURN:
+    X (DataFrame) - X DataFrame
+    Y (DataFrame) - Y DataFrame
+    category_names (string[]) - array of category names
+    '''
     df = pd.read_sql("SELECT * FROM messages_and_categories", sq.connect(database_filepath))
 
     if sys.argv[-1] == "test":
@@ -46,6 +55,13 @@ def load_data(database_filepath):
 
 
 def build_model():
+    '''
+    PARAMETER:
+    None
+
+    RETURN:
+    model (GridSearchCV) - grid search model
+    '''
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -61,6 +77,16 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    '''
+    PARAMETER:
+    model (BaseEstimator) - trained model
+    X_test (DataFrame) - X test Dataframe
+    Y_test (DataFrame) - Y test Dataframe
+    category_names (string[]) - array of category name
+
+    RETURN:
+    None
+    '''
     Y_preds = pd.DataFrame(model.predict(X_test), columns=category_names)
 
     for category in category_names:
@@ -68,6 +94,14 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+    '''
+    PARAMETER:
+    model (BaseEstimator) - trained model
+    model_filepath (string) - save file directory
+
+    RETURN:
+    None
+    '''
     with open(model_filepath, 'wb') as dir:
         pickle.dump(model.best_estimator_, dir)
 

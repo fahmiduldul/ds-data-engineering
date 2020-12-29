@@ -12,6 +12,7 @@ from sqlalchemy import create_engine
 import sqlite3 as sq
 import re
 import pickle
+from tabulate import tabulate
 from tokenizer import tokenize
 
 import nltk
@@ -45,7 +46,7 @@ def load_data(database_filepath):
     df = pd.read_sql("SELECT * FROM messages_and_categories", sq.connect(database_filepath))
 
     if sys.argv[-1] == "test":
-        df = df.iloc[:100]
+        df = df.iloc[:20]
 
     X = df["message"]
     Y = df.drop(["message", "original", "genre"], axis=1)
@@ -89,8 +90,19 @@ def evaluate_model(model, X_test, Y_test, category_names):
     '''
     Y_preds = pd.DataFrame(model.predict(X_test), columns=category_names)
 
+    headers = ['category', 'precision', 'recall', 'f1-score', 'support']
+    rows = []
     for category in category_names:
-        print(classification_report(Y_test[category], Y_preds[category]))
+        report = classification_report(Y_test[category], Y_preds[category], output_dict=True)
+        rows.append([
+            category,
+            report['weighted avg']['precision'],
+            report['weighted avg']['recall'],
+            report['weighted avg']['f1-score'],
+            report['weighted avg']['support']
+        ])
+    
+    print(tabulate(rows, headers=headers) )
 
 
 def save_model(model, model_filepath):

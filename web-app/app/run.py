@@ -1,6 +1,8 @@
 import json
 import plotly
 import pandas as pd
+import pickle
+from tokenizer import tokenize
 
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
@@ -8,29 +10,18 @@ from nltk.tokenize import word_tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
-from sklearn.externals import joblib
 from sqlalchemy import create_engine
 
 
 app = Flask(__name__)
 
-def tokenize(text):
-    tokens = word_tokenize(text)
-    lemmatizer = WordNetLemmatizer()
-
-    clean_tokens = []
-    for tok in tokens:
-        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
-        clean_tokens.append(clean_tok)
-
-    return clean_tokens
-
 # load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
+engine = create_engine('sqlite:///database/DisasterResponse.db')
+df = pd.read_sql_table('messages_and_categories', engine)
 
 # load model
-model = joblib.load("../models/your_model_name.pkl")
+file_dir = r"models/test_model.pickle"
+model = pickle.load(open(file_dir, "rb"))
 
 
 # index webpage displays cool visuals and receives user input text for model

@@ -9,7 +9,7 @@ from nltk.tokenize import word_tokenize
 
 from flask import Flask
 from flask import render_template, request, jsonify
-from plotly.graph_objs import Bar
+from plotly.graph_objs import Bar, Pie
 from sqlalchemy import create_engine
 
 
@@ -54,7 +54,26 @@ def index():
                     'title': "Genre"
                 }
             }
+        },
+
+        {
+            'data':[
+                Bar(
+                    x=['unrelated', 'related'],
+                    y=df.groupby('related').count()['message']
+                )
+            ],
+            'layout': {
+                'title': 'Distribution of Disaster-related Messages',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Relation"
+                }
+            }
         }
+
     ]
     
     # encode plotly graphs in JSON
